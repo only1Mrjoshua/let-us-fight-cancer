@@ -5,10 +5,11 @@ import { Heart, ArrowRight, Clock, MapPin, Users } from 'lucide-react';
 import Navbar from '../../components/Navbar/Navbar';
 import Footer from '../../components/Footer/Footer';
 import DonationProgressBar from '../../components/DonationProgressBar/DonationProgressBar';
-import { extendedPatients } from '../../data/extendedPatientData';
+import { usePatients } from '../../context/PatientContext';
 
 const Donate = () => {
   const navigate = useNavigate();
+  const { patients } = usePatients();
 
   return (
     <main>
@@ -73,84 +74,91 @@ const Donate = () => {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {extendedPatients.map((patient, index) => (
-              <motion.div
-                key={patient.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1, duration: 0.6 }}
-                whileHover={{ y: -8 }}
-                className="bg-white rounded-2xl shadow-xl overflow-hidden border border-primary-light border-opacity-20"
-              >
-                {/* Patient Image */}
-                <div className="relative h-48 overflow-hidden">
-                  <img
-                    src={patient.image}
-                    alt={`${patient.name}, ${patient.cancerType} patient`}
-                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-dark to-transparent opacity-40" />
-                  <div className="absolute top-4 right-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold font-body ${
-                      patient.treatmentStatus === 'Urgent' 
-                        ? 'bg-red-500 text-white' 
-                        : patient.treatmentStatus === 'In Treatment'
-                        ? 'bg-primary-dark text-white'
-                        : 'bg-yellow-500 text-white'
-                    }`}>
-                      {patient.treatmentStatus}
-                    </span>
-                  </div>
-                  <div className="absolute bottom-4 left-4">
-                    <span className="px-3 py-1 bg-white bg-opacity-90 rounded-full text-xs font-semibold text-primary-dark font-body">
-                      {patient.cancerType}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Patient Info */}
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h3 className="text-xl font-bold text-dark font-heading">{patient.name}</h3>
-                      <p className="text-sm text-neutral-gray font-body">{patient.age} years old</p>
+          {patients.length === 0 ? (
+            <div className="text-center py-12">
+              <Heart className="w-16 h-16 text-primary-light mx-auto mb-4" />
+              <p className="text-xl text-neutral-gray font-body">No patients currently listed. Check back soon.</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {patients.map((patient, index) => (
+                <motion.div
+                  key={patient.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.6 }}
+                  whileHover={{ y: -8 }}
+                  className="bg-white rounded-2xl shadow-xl overflow-hidden border border-primary-light border-opacity-20"
+                >
+                  {/* Patient Image */}
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={patient.image}
+                      alt={`${patient.name}, ${patient.cancerType} patient`}
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-dark to-transparent opacity-40" />
+                    <div className="absolute top-4 right-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold font-body ${
+                        patient.treatmentStatus === 'Urgent' 
+                          ? 'bg-red-500 text-white' 
+                          : patient.treatmentStatus === 'In Treatment'
+                          ? 'bg-primary-dark text-white'
+                          : 'bg-yellow-500 text-white'
+                      }`}>
+                        {patient.treatmentStatus}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-1 text-sm text-neutral-gray font-body">
-                      <MapPin className="w-4 h-4" />
-                      <span>{patient.location}</span>
+                    <div className="absolute bottom-4 left-4">
+                      <span className="px-3 py-1 bg-white bg-opacity-90 rounded-full text-xs font-semibold text-primary-dark font-body">
+                        {patient.cancerType}
+                      </span>
                     </div>
                   </div>
 
-                  <p className="text-dark text-opacity-80 mb-6 leading-relaxed text-sm font-body line-clamp-3">
-                    {patient.shortStory}
-                  </p>
-
-                  <DonationProgressBar 
-                    raised={patient.amountRaised} 
-                    needed={patient.amountNeeded} 
-                  />
-
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-neutral-light">
-                    <div className="flex items-center gap-2 text-sm text-neutral-gray font-body">
-                      <Clock className="w-4 h-4" />
-                      <span>{patient.daysLeft} days left</span>
+                  {/* Patient Info */}
+                  <div className="p-6">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h3 className="text-xl font-bold text-dark font-heading">{patient.name}</h3>
+                        <p className="text-sm text-neutral-gray font-body">{patient.age} years old</p>
+                      </div>
+                      <div className="flex items-center gap-1 text-sm text-neutral-gray font-body">
+                        <MapPin className="w-4 h-4" />
+                        <span>{patient.location}</span>
+                      </div>
                     </div>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => navigate(`/patient/${patient.id}`)}
-                      className="flex items-center gap-2 bg-primary-dark text-white px-4 py-2 rounded-full font-semibold text-sm hover:bg-opacity-90 transition-all font-body"
-                    >
-                      View More
-                      <ArrowRight className="w-4 h-4" />
-                    </motion.button>
+
+                    <p className="text-dark text-opacity-80 mb-6 leading-relaxed text-sm font-body line-clamp-3">
+                      {patient.shortStory}
+                    </p>
+
+                    <DonationProgressBar 
+                      raised={patient.amountRaised} 
+                      needed={patient.amountNeeded} 
+                    />
+
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-neutral-light">
+                      <div className="flex items-center gap-2 text-sm text-neutral-gray font-body">
+                        <Clock className="w-4 h-4" />
+                        <span>{patient.daysLeft} days left</span>
+                      </div>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => navigate(`/patient/${patient.id}`)}
+                        className="flex items-center gap-2 bg-primary-dark text-white px-4 py-2 rounded-full font-semibold text-sm hover:bg-opacity-90 transition-all font-body"
+                      >
+                        View More
+                        <ArrowRight className="w-4 h-4" />
+                      </motion.button>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

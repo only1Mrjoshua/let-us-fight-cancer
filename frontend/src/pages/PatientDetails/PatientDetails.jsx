@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { 
   Clock, 
   MapPin, 
@@ -16,19 +15,20 @@ import {
 } from 'lucide-react';
 import DonationProgressBar from '../../components/DonationProgressBar/DonationProgressBar';
 import CopyButton from '../../components/CopyButton/CopyButton';
-import { extendedPatients } from '../../data/extendedPatientData';
+import { usePatients } from '../../context/PatientContext';
 
 const PatientDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [activeVideo, setActiveVideo] = useState(false);
+  const { getPatient } = usePatients();
 
   // Scroll to top on mount and when id changes
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
 
-  const patient = extendedPatients.find(p => p.id === parseInt(id));
+  const patient = getPatient(id);
 
   if (!patient) {
     return (
