@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useScrollTo } from '../../hooks/useScrollTo';
-import logoIcon from '../../assets/images/logo.png'; // Import the logo icon
+import logoIcon from '../../assets/images/logo.png';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { scrollToSection } = useScrollTo();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,17 +21,48 @@ const Navbar = () => {
   }, []);
 
   const navItems = [
-    { label: 'Home', sectionId: 'home' },
-    { label: 'About', sectionId: 'mission' },
-    { label: 'Patients', sectionId: 'patients' },
-    { label: 'Success Stories', sectionId: 'testimonials' },
-    { label: 'Donate', sectionId: 'donate' },
-    { label: 'Contact', sectionId: 'footer' },
+    { label: 'Home', sectionId: 'home', path: '/' },
+    { label: 'About', sectionId: 'mission', path: '/' },
+    { label: 'Patients', sectionId: 'patients', path: '/' },
+    { label: 'Success Stories', sectionId: 'testimonials', path: '/' },
+    { label: 'Donate', path: '/donate' },
+    { label: 'Contact', sectionId: 'footer', path: '/' },
   ];
 
-  const handleNavClick = (sectionId) => {
-    scrollToSection(sectionId);
+  const handleNavClick = (item) => {
     setIsMobileMenuOpen(false);
+    
+    // If it's the Donate page, navigate to /donate
+    if (item.path === '/donate') {
+      navigate('/donate');
+      return;
+    }
+    
+    // If we're not on the home page, navigate to home first then scroll
+    if (location.pathname !== '/') {
+      navigate('/');
+      // Wait for navigation to complete, then scroll
+      setTimeout(() => {
+        scrollToSection(item.sectionId);
+      }, 100);
+    } else {
+      // If already on home page, just scroll
+      scrollToSection(item.sectionId);
+    }
+  };
+
+  const handleDonateClick = () => {
+    setIsMobileMenuOpen(false);
+    navigate('/donate');
+  };
+
+  const handleLogoClick = () => {
+    setIsMobileMenuOpen(false);
+    if (location.pathname !== '/') {
+      navigate('/');
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -48,7 +82,7 @@ const Navbar = () => {
           <motion.div 
             className="flex items-center gap-2 cursor-pointer"
             whileHover={{ scale: 1.05 }}
-            onClick={() => handleNavClick('home')}
+            onClick={handleLogoClick}
           >
             <img 
               src={logoIcon} 
@@ -64,8 +98,8 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-1">
             {navItems.map((item) => (
               <button
-                key={item.sectionId}
-                onClick={() => handleNavClick(item.sectionId)}
+                key={item.label}
+                onClick={() => handleNavClick(item)}
                 className="px-3 py-2 text-sm font-medium text-dark hover:text-primary-dark transition-colors duration-200 font-body"
               >
                 {item.label}
@@ -74,7 +108,7 @@ const Navbar = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => handleNavClick('donate')}
+              onClick={handleDonateClick}
               className="ml-4 px-6 py-2 bg-primary-dark text-white rounded-full font-semibold text-sm hover:bg-opacity-90 transition-all duration-200 shadow-lg font-body"
             >
               Donate Now
@@ -117,8 +151,8 @@ const Navbar = () => {
               </div>
               {navItems.map((item) => (
                 <button
-                  key={item.sectionId}
-                  onClick={() => handleNavClick(item.sectionId)}
+                  key={item.label}
+                  onClick={() => handleNavClick(item)}
                   className="block w-full text-left px-3 py-2 text-dark hover:text-primary-dark font-body transition-colors"
                 >
                   {item.label}
@@ -126,7 +160,7 @@ const Navbar = () => {
               ))}
               <motion.button
                 whileTap={{ scale: 0.95 }}
-                onClick={() => handleNavClick('donate')}
+                onClick={handleDonateClick}
                 className="w-full mt-2 px-6 py-3 bg-primary-dark text-white rounded-full font-semibold text-center hover:bg-opacity-90 transition-all font-body"
               >
                 Donate Now

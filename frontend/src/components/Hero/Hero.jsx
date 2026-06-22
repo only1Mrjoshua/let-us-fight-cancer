@@ -1,11 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Heart, ArrowRight, Play } from 'lucide-react';
 import AnimatedCounter from '../AnimatedCounter/AnimatedCounter';
 import { useScrollTo } from '../../hooks/useScrollTo';
 
 const Hero = () => {
   const { scrollToSection } = useScrollTo();
+  const navigate = useNavigate();
 
   const floatingElements = [
     { icon: Heart, delay: 0, x: '10%', y: '20%' },
@@ -81,7 +83,7 @@ const Hero = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => scrollToSection('donate')}
+                onClick={() => navigate('/donate')}
                 className="btn-primary bg-white text-primary-dark hover:bg-opacity-90 flex items-center justify-center gap-2"
               >
                 Donate Now
@@ -101,14 +103,14 @@ const Hero = () => {
 
             {/* Stats */}
             <motion.div 
-            className="grid grid-cols-3 gap-4 md:gap-8"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.8 }}
+              className="grid grid-cols-3 gap-4 md:gap-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8, duration: 0.8 }}
             >
-            <AnimatedCounter end={5} prefix="$" suffix="M+" label="Raised" />
-            <AnimatedCounter end={2500} suffix="+" label="Lives Impacted" />
-            <AnimatedCounter end={300} suffix="+" label="Active Donors" />
+              <AnimatedCounter end={5} prefix="$" suffix="M+" label="Raised" />
+              <AnimatedCounter end={2500} suffix="+" label="Lives Impacted" />
+              <AnimatedCounter end={300} suffix="+" label="Active Donors" />
             </motion.div>
           </motion.div>
 

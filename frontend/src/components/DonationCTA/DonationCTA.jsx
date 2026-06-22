@@ -1,10 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Heart, Shield, Lock, Users, CheckCircle } from 'lucide-react';
 import { useScrollTo } from '../../hooks/useScrollTo';
 
 const DonationCTA = () => {
   const { scrollToSection } = useScrollTo();
+  const navigate = useNavigate();
 
   const trustIndicators = [
     { icon: Shield, text: '100% Secure Donations' },
@@ -27,7 +29,7 @@ const DonationCTA = () => {
           </h2>
           
           <p className="text-xl text-white text-opacity-90 mb-12 leading-relaxed font-body">
-            Every donation brings hope. Every donation saves a life. Be the reason someone 
+            Every dollar brings hope. Every donation saves a life. Be the reason someone 
             gets another chance to fight.
           </p>
 
@@ -35,12 +37,22 @@ const DonationCTA = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/donate')}
               className="btn-primary bg-white text-primary-dark hover:bg-opacity-90 text-lg px-10 py-4 flex items-center justify-center gap-2"
             >
               <Heart className="w-6 h-6" aria-hidden="true" />
               Donate Now
             </motion.button>
-        
+            
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => scrollToSection('footer')}
+              className="btn-secondary bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary-dark text-lg px-10 py-4 flex items-center justify-center gap-2"
+            >
+              <Users className="w-6 h-6" aria-hidden="true" />
+              Become a Partner
+            </motion.button>
           </div>
 
           {/* Trust Indicators */}

@@ -1,12 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Clock } from 'lucide-react';
 import { patients } from '../../data/patientData';
 import DonationProgressBar from '../DonationProgressBar/DonationProgressBar';
-import { useScrollTo } from '../../hooks/useScrollTo';
 
 const PatientStories = () => {
-  const { scrollToSection } = useScrollTo();
+  const navigate = useNavigate();
 
   return (
     <section id="patients" className="section-padding bg-white">
@@ -74,7 +74,7 @@ const PatientStories = () => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => scrollToSection('donate')}
+                    onClick={() => navigate(`/patient/${patient.id}`)}
                     className="flex items-center gap-2 text-primary-dark font-semibold text-sm hover:text-opacity-80 transition-colors font-body"
                     aria-label={`View more about ${patient.name}`}
                   >
@@ -86,6 +86,24 @@ const PatientStories = () => {
             </motion.div>
           ))}
         </div>
+        
+        {/* See All Patients Button */}
+        <motion.div 
+          className="text-center mt-12"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+        >
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/donate')}
+            className="btn-primary flex items-center gap-2 mx-auto"
+          >
+            See All Patients & Donate
+            <ArrowRight className="w-5 h-5" />
+          </motion.button>
+        </motion.div>
       </div>
     </section>
   );
