@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-  Heart, 
   Clock, 
   MapPin, 
   Building2, 
@@ -23,6 +22,11 @@ const PatientDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [activeVideo, setActiveVideo] = useState(false);
+
+  // Scroll to top on mount and when id changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
 
   const patient = extendedPatients.find(p => p.id === parseInt(id));
 
@@ -50,26 +54,20 @@ const PatientDetails = () => {
     <main className="bg-white">
       {/* Back Button */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        <motion.button
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
+        <button
           onClick={() => navigate('/donate')}
           className="flex items-center gap-2 text-primary-dark hover:text-primary-dark hover:text-opacity-80 transition-colors font-body font-semibold"
         >
           <ArrowLeft className="w-5 h-5" />
           Back to All Patients
-        </motion.button>
+        </button>
       </div>
 
       {/* Hero Banner */}
       <section className="pt-8 pb-12 bg-gradient-to-br from-primary-light via-primary-medium to-primary-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-8 items-center">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
+            <div>
               <div className="flex items-center gap-3 mb-4">
                 <span className={`px-3 py-1 rounded-full text-xs font-semibold font-body ${
                   patient.treatmentStatus === 'Urgent' 
@@ -98,20 +96,15 @@ const PatientDetails = () => {
               <p className="text-lg text-white text-opacity-90 font-body">
                 {patient.shortStory}
               </p>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6 }}
-              className="relative"
-            >
+            <div className="relative">
               <img
                 src={patient.image}
                 alt={patient.name}
                 className="w-full h-64 md:h-80 object-cover rounded-2xl shadow-2xl"
               />
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -135,12 +128,7 @@ const PatientDetails = () => {
             {/* Left Column - Story & Details */}
             <div className="md:col-span-2 space-y-8">
               {/* Full Story */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="bg-white rounded-2xl shadow-lg p-8 border border-primary-light border-opacity-20"
-              >
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-primary-light border-opacity-20">
                 <h2 className="text-2xl font-bold text-dark mb-6 font-heading flex items-center gap-2">
                   <FileText className="w-6 h-6 text-primary-dark" />
                   Their Story
@@ -148,16 +136,10 @@ const PatientDetails = () => {
                 <p className="text-dark leading-relaxed text-lg font-body whitespace-pre-line">
                   {patient.story}
                 </p>
-              </motion.div>
+              </div>
 
               {/* Treatment Plan */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-                className="bg-neutral-light rounded-2xl p-8"
-              >
+              <div className="bg-neutral-light rounded-2xl p-8">
                 <h2 className="text-2xl font-bold text-dark mb-6 font-heading flex items-center gap-2">
                   <Building2 className="w-6 h-6 text-primary-dark" />
                   Treatment Plan
@@ -183,16 +165,10 @@ const PatientDetails = () => {
                     </p>
                   </div>
                 </div>
-              </motion.div>
+              </div>
 
               {/* Video Section */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
-                className="bg-white rounded-2xl shadow-lg p-8 border border-primary-light border-opacity-20"
-              >
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-primary-light border-opacity-20">
                 <h2 className="text-2xl font-bold text-dark mb-6 font-heading flex items-center gap-2">
                   <Play className="w-6 h-6 text-primary-dark" />
                   Video Story
@@ -205,12 +181,9 @@ const PatientDetails = () => {
                       className="w-full h-64 object-cover"
                     />
                     <div className="absolute inset-0 bg-dark bg-opacity-40 flex items-center justify-center">
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg"
-                      >
+                      <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
                         <Play className="w-8 h-8 text-primary-dark ml-1" />
-                      </motion.div>
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -224,41 +197,28 @@ const PatientDetails = () => {
                     />
                   </div>
                 )}
-              </motion.div>
+              </div>
 
               {/* Photo Gallery */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.3 }}
-                className="bg-white rounded-2xl shadow-lg p-8 border border-primary-light border-opacity-20"
-              >
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-primary-light border-opacity-20">
                 <h2 className="text-2xl font-bold text-dark mb-6 font-heading">Photo Gallery</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {patient.gallery.map((img, index) => (
-                    <motion.img
+                    <img
                       key={index}
                       src={img}
                       alt={`${patient.name} photo ${index + 1}`}
-                      className="w-full h-40 md:h-48 object-cover rounded-xl cursor-pointer shadow-md"
-                      whileHover={{ scale: 1.05 }}
+                      className="w-full h-40 md:h-48 object-cover rounded-xl cursor-pointer shadow-md hover:scale-105 transition-transform"
                       onClick={() => window.open(img, '_blank')}
                     />
                   ))}
                 </div>
-              </motion.div>
+              </div>
             </div>
 
             {/* Right Column - Donation Card */}
-            <div className="space-y-6">
-              {/* Progress Card */}
-              <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="bg-white rounded-2xl shadow-xl p-6 border-2 border-primary-light sticky top-6"
-              >
+            <div>
+              <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-primary-light">
                 <h3 className="text-xl font-bold text-dark mb-4 font-heading">Donation Progress</h3>
                 <DonationProgressBar 
                   raised={patient.amountRaised} 
@@ -357,7 +317,7 @@ const PatientDetails = () => {
                     100% of donations go directly to patient treatment
                   </p>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </div>
         </div>
