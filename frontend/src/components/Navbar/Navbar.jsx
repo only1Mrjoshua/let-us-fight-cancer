@@ -25,18 +25,11 @@ const Navbar = () => {
     { label: 'About', sectionId: 'mission', path: '/' },
     { label: 'Patients', sectionId: 'patients', path: '/' },
     { label: 'Success Stories', sectionId: 'testimonials', path: '/' },
-    { label: 'Donate', path: '/donate' },
     { label: 'Contact', sectionId: 'footer', path: '/' },
   ];
 
   const handleNavClick = (item) => {
     setIsMobileMenuOpen(false);
-    
-    // If it's the Donate page, navigate to /donate
-    if (item.path === '/donate') {
-      navigate('/donate');
-      return;
-    }
     
     // If we're not on the home page, navigate to home first then scroll
     if (location.pathname !== '/') {
@@ -44,7 +37,7 @@ const Navbar = () => {
       // Wait for navigation to complete, then scroll
       setTimeout(() => {
         scrollToSection(item.sectionId);
-      }, 100);
+      }, 150);
     } else {
       // If already on home page, just scroll
       scrollToSection(item.sectionId);
@@ -53,6 +46,8 @@ const Navbar = () => {
 
   const handleDonateClick = () => {
     setIsMobileMenuOpen(false);
+    // Force scroll to top before navigating
+    window.scrollTo(0, 0);
     navigate('/donate');
   };
 

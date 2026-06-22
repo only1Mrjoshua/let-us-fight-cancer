@@ -43,16 +43,6 @@ const DonationCTA = () => {
               <Heart className="w-6 h-6" aria-hidden="true" />
               Donate Now
             </motion.button>
-            
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => scrollToSection('footer')}
-              className="btn-secondary bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary-dark text-lg px-10 py-4 flex items-center justify-center gap-2"
-            >
-              <Users className="w-6 h-6" aria-hidden="true" />
-              Become a Partner
-            </motion.button>
           </div>
 
           {/* Trust Indicators */}
