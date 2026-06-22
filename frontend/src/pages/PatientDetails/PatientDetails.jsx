@@ -5,7 +5,6 @@ import {
   Heart, 
   Clock, 
   MapPin, 
-  TrendingUp, 
   Building2, 
   FileText, 
   Play,
@@ -16,8 +15,6 @@ import {
   Users,
   Shield
 } from 'lucide-react';
-import Navbar from '../../components/Navbar/Navbar';
-import Footer from '../../components/Footer/Footer';
 import DonationProgressBar from '../../components/DonationProgressBar/DonationProgressBar';
 import CopyButton from '../../components/CopyButton/CopyButton';
 import { extendedPatients } from '../../data/extendedPatientData';
@@ -31,10 +28,9 @@ const PatientDetails = () => {
 
   if (!patient) {
     return (
-      <main>
-        <Navbar />
+      <main className="min-h-screen bg-white">
         <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
+          <div className="text-center px-4">
             <AlertCircle className="w-16 h-16 text-primary-dark mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-dark mb-2 font-heading">Patient Not Found</h2>
             <p className="text-neutral-gray mb-6 font-body">The patient you're looking for doesn't exist.</p>
@@ -46,28 +42,28 @@ const PatientDetails = () => {
             </button>
           </div>
         </div>
-        <Footer />
       </main>
     );
   }
 
   return (
-    <main>
-      <Navbar />
+    <main className="bg-white">
+      {/* Back Button */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <motion.button
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          onClick={() => navigate('/donate')}
+          className="flex items-center gap-2 text-primary-dark hover:text-primary-dark hover:text-opacity-80 transition-colors font-body font-semibold"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to All Patients
+        </motion.button>
+      </div>
 
       {/* Hero Banner */}
-      <section className="pt-24 pb-12 bg-gradient-to-br from-primary-light via-primary-medium to-primary-dark">
+      <section className="pt-8 pb-12 bg-gradient-to-br from-primary-light via-primary-medium to-primary-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.button
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            onClick={() => navigate('/donate')}
-            className="flex items-center gap-2 text-white mb-6 hover:text-white hover:text-opacity-80 transition-colors font-body"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back to All Patients
-          </motion.button>
-
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -120,9 +116,21 @@ const PatientDetails = () => {
         </div>
       </section>
 
+      {/* Urgent Banner */}
+      {patient.treatmentStatus === 'Urgent' && (
+        <section className="bg-red-500 py-3">
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            <p className="text-white font-bold font-body flex items-center justify-center gap-2">
+              <AlertCircle className="w-5 h-5" />
+              URGENT: This patient needs immediate treatment. Every donation counts.
+            </p>
+          </div>
+        </section>
+      )}
+
       {/* Main Content */}
-      <section className="section-padding bg-white">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8">
             {/* Left Column - Story & Details */}
             <div className="md:col-span-2 space-y-8">
@@ -249,7 +257,7 @@ const PatientDetails = () => {
                 initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                className="bg-white rounded-2xl shadow-xl p-6 border-2 border-primary-light sticky top-24"
+                className="bg-white rounded-2xl shadow-xl p-6 border-2 border-primary-light sticky top-6"
               >
                 <h3 className="text-xl font-bold text-dark mb-4 font-heading">Donation Progress</h3>
                 <DonationProgressBar 
@@ -354,20 +362,6 @@ const PatientDetails = () => {
           </div>
         </div>
       </section>
-
-      {/* Urgent Help Banner */}
-      {patient.treatmentStatus === 'Urgent' && (
-        <section className="bg-red-500 py-4">
-          <div className="max-w-7xl mx-auto px-4 text-center">
-            <p className="text-white font-bold font-body flex items-center justify-center gap-2">
-              <AlertCircle className="w-5 h-5" />
-              URGENT: This patient needs immediate treatment. Every donation counts.
-            </p>
-          </div>
-        </section>
-      )}
-
-      <Footer />
     </main>
   );
 };
