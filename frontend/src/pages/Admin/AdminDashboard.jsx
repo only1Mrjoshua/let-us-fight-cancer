@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, Plus, Edit, Trash2, LogOut, ArrowLeft, Heart, DollarSign, Activity } from 'lucide-react';
+import { Users, Plus, Edit, Trash2, LogOut, ArrowLeft, Heart, DollarSign, Activity, FileText } from 'lucide-react';
 import { usePatients } from '../../context/PatientContext';
 import { formatCurrency } from '../../utils/formatCurrency';
 
@@ -84,18 +84,28 @@ const AdminDashboard = () => {
           </motion.div>
         </div>
 
-        {/* Add Patient Button */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-dark font-heading">All Patients</h2>
-          <motion.button
+        <h2 className="text-2xl font-bold text-dark font-heading">All Patients</h2>
+        <div className="flex gap-3">
+            <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/admin/edit-content')}
+            className="flex items-center gap-2 bg-primary-medium text-white px-6 py-3 rounded-full font-semibold hover:bg-opacity-90 transition-all font-body shadow-lg"
+            >
+            <FileText className="w-5 h-5" />
+            Edit Site Content
+            </motion.button>
+            <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate('/admin/add-patient')}
             className="flex items-center gap-2 bg-primary-dark text-white px-6 py-3 rounded-full font-semibold hover:bg-opacity-90 transition-all font-body shadow-lg"
-          >
+            >
             <Plus className="w-5 h-5" />
             Add New Patient
-          </motion.button>
+            </motion.button>
+        </div>
         </div>
 
         {/* Patients Table */}

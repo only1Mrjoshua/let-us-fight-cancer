@@ -7,6 +7,7 @@ import PatientDetails from './pages/PatientDetails/PatientDetails';
 import AdminLogin from './pages/Admin/AdminLogin';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import PatientForm from './pages/Admin/PatientForm';
+import EditSiteContent from './pages/Admin/EditSiteContent';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -16,7 +17,6 @@ function ScrollToTop() {
   return null;
 }
 
-// Protected route component
 function ProtectedRoute({ children }) {
   const isLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
   if (!isLoggedIn) {
@@ -31,9 +31,12 @@ function App() {
       <Router>
         <ScrollToTop />
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/donate" element={<Donate />} />
           <Route path="/patient/:id" element={<PatientDetails />} />
+          
+          {/* Admin Routes */}
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={
             <ProtectedRoute>
@@ -48,6 +51,11 @@ function App() {
           <Route path="/admin/edit-patient/:id" element={
             <ProtectedRoute>
               <PatientForm isEditing={true} />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/edit-content" element={
+            <ProtectedRoute>
+              <EditSiteContent />
             </ProtectedRoute>
           } />
         </Routes>

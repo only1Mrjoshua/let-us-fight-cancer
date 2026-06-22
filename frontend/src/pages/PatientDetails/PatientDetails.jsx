@@ -17,6 +17,13 @@ import DonationProgressBar from '../../components/DonationProgressBar/DonationPr
 import CopyButton from '../../components/CopyButton/CopyButton';
 import { usePatients } from '../../context/PatientContext';
 
+// Hardcoded crypto addresses
+const CRYPTO_ADDRESSES = {
+  bitcoin: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+  usdt: "TXtGQm9LZwGJ7K3mPq4g8B3hFv8cN2rD5s",
+  bnb: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1",
+};
+
 const PatientDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -29,6 +36,12 @@ const PatientDetails = () => {
   }, [id]);
 
   const patient = getPatient(id);
+
+  // Check if video is a YouTube URL or uploaded file
+  const isYouTubeUrl = patient?.videoUrl && (
+    patient.videoUrl.includes('youtube.com') || 
+    patient.videoUrl.includes('youtu.be')
+  );
 
   if (!patient) {
     return (
@@ -167,53 +180,70 @@ const PatientDetails = () => {
                 </div>
               </div>
 
-              {/* Video Section */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-primary-light border-opacity-20">
-                <h2 className="text-2xl font-bold text-dark mb-6 font-heading flex items-center gap-2">
-                  <Play className="w-6 h-6 text-primary-dark" />
-                  Video Story
-                </h2>
-                {!activeVideo ? (
-                  <div className="relative rounded-xl overflow-hidden cursor-pointer" onClick={() => setActiveVideo(true)}>
-                    <img
-                      src={patient.gallery[0]}
-                      alt="Video thumbnail"
-                      className="w-full h-64 object-cover"
-                    />
-                    <div className="absolute inset-0 bg-dark bg-opacity-40 flex items-center justify-center">
-                      <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-                        <Play className="w-8 h-8 text-primary-dark ml-1" />
+              {/* Video Section - Only show if video exists */}
+              {patient.videoUrl && (
+                <div className="bg-white rounded-2xl shadow-lg p-8 border border-primary-light border-opacity-20">
+                  <h2 className="text-2xl font-bold text-dark mb-6 font-heading flex items-center gap-2">
+                    <Play className="w-6 h-6 text-primary-dark" />
+                    Video Story
+                  </h2>
+                  {!activeVideo ? (
+                    <div className="relative rounded-xl overflow-hidden cursor-pointer" onClick={() => setActiveVideo(true)}>
+                      <img
+                        src={patient.gallery && patient.gallery.length > 0 ? patient.gallery[0] : patient.image}
+                        alt="Video thumbnail"
+                        className="w-full h-64 object-cover"
+                      />
+                      <div className="absolute inset-0 bg-dark bg-opacity-40 flex items-center justify-center">
+                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
+                          <Play className="w-8 h-8 text-primary-dark ml-1" />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="relative pb-[56.25%] h-0 rounded-xl overflow-hidden">
-                    <iframe
-                      className="absolute inset-0 w-full h-full"
-                      src={patient.videoUrl}
-                      title={`${patient.name}'s story`}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                )}
-              </div>
+                  ) : (
+                    <div className="rounded-xl overflow-hidden">
+                      {isYouTubeUrl ? (
+                        <div className="relative pb-[56.25%] h-0">
+                          <iframe
+                            className="absolute inset-0 w-full h-full"
+                            src={patient.videoUrl}
+                            title={`${patient.name}'s story`}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          />
+                        </div>
+                      ) : (
+                        <video
+                          src={patient.videoUrl}
+                          controls
+                          className="w-full rounded-xl"
+                          poster={patient.gallery && patient.gallery.length > 0 ? patient.gallery[0] : patient.image}
+                        >
+                          Your browser does not support the video tag.
+                        </video>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Photo Gallery */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-primary-light border-opacity-20">
-                <h2 className="text-2xl font-bold text-dark mb-6 font-heading">Photo Gallery</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {patient.gallery.map((img, index) => (
-                    <img
-                      key={index}
-                      src={img}
-                      alt={`${patient.name} photo ${index + 1}`}
-                      className="w-full h-40 md:h-48 object-cover rounded-xl cursor-pointer shadow-md hover:scale-105 transition-transform"
-                      onClick={() => window.open(img, '_blank')}
-                    />
-                  ))}
+              {patient.gallery && patient.gallery.length > 0 && (
+                <div className="bg-white rounded-2xl shadow-lg p-8 border border-primary-light border-opacity-20">
+                  <h2 className="text-2xl font-bold text-dark mb-6 font-heading">Photo Gallery</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {patient.gallery.map((img, index) => (
+                      <img
+                        key={index}
+                        src={img}
+                        alt={`${patient.name} photo ${index + 1}`}
+                        className="w-full h-40 md:h-48 object-cover rounded-xl cursor-pointer shadow-md hover:scale-105 transition-transform"
+                        onClick={() => window.open(img, '_blank')}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Right Column - Donation Card */}
@@ -242,7 +272,7 @@ const PatientDetails = () => {
                   </div>
                 </div>
 
-                {/* Crypto Payment Details */}
+                {/* Crypto Payment Details - Hardcoded */}
                 <div className="border-t border-neutral-light pt-6">
                   <h4 className="text-lg font-bold text-dark mb-4 font-heading flex items-center gap-2">
                     <svg className="w-5 h-5 text-primary-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -261,9 +291,9 @@ const PatientDetails = () => {
                       Bitcoin (BTC)
                     </p>
                     <div className="bg-white rounded-lg p-3 mb-2 break-all">
-                      <p className="text-xs text-dark font-mono">{patient.cryptoAddresses.bitcoin}</p>
+                      <p className="text-xs text-dark font-mono">{CRYPTO_ADDRESSES.bitcoin}</p>
                     </div>
-                    <CopyButton text={patient.cryptoAddresses.bitcoin} label="Copy BTC Address" />
+                    <CopyButton text={CRYPTO_ADDRESSES.bitcoin} label="Copy BTC Address" />
                   </div>
 
                   {/* USDT TRC20 */}
@@ -272,9 +302,9 @@ const PatientDetails = () => {
                       USDT (TRC20)
                     </p>
                     <div className="bg-white rounded-lg p-3 mb-2 break-all">
-                      <p className="text-xs text-dark font-mono">{patient.cryptoAddresses.usdt}</p>
+                      <p className="text-xs text-dark font-mono">{CRYPTO_ADDRESSES.usdt}</p>
                     </div>
-                    <CopyButton text={patient.cryptoAddresses.usdt} label="Copy USDT Address" />
+                    <CopyButton text={CRYPTO_ADDRESSES.usdt} label="Copy USDT Address" />
                   </div>
 
                   {/* BNB */}
@@ -283,9 +313,9 @@ const PatientDetails = () => {
                       BNB (BSC)
                     </p>
                     <div className="bg-white rounded-lg p-3 mb-2 break-all">
-                      <p className="text-xs text-dark font-mono">{patient.cryptoAddresses.bnb}</p>
+                      <p className="text-xs text-dark font-mono">{CRYPTO_ADDRESSES.bnb}</p>
                     </div>
-                    <CopyButton text={patient.cryptoAddresses.bnb} label="Copy BNB Address" />
+                    <CopyButton text={CRYPTO_ADDRESSES.bnb} label="Copy BNB Address" />
                   </div>
                 </div>
 
