@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Clock, 
@@ -11,8 +11,12 @@ import {
   ArrowLeft,
   DollarSign,
   Users,
-  Shield
+  Shield,
+  X,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import DonationProgressBar from '../../components/DonationProgressBar/DonationProgressBar';
 import CopyButton from '../../components/CopyButton/CopyButton';
 import { api } from '../../services/api';
@@ -30,6 +34,10 @@ const PatientDetails = () => {
   const [activeVideo, setActiveVideo] = useState(false);
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     if (id) {
@@ -40,6 +48,28 @@ const PatientDetails = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!lightboxOpen) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') prevImage();
+      if (e.key === 'ArrowRight') nextImage();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lightboxOpen, currentImageIndex]);
+
+  // Prevent body scroll when lightbox is open
+  useEffect(() => {
+    if (lightboxOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [lightboxOpen]);
 
   const fetchPatient = async () => {
     try {
@@ -57,6 +87,29 @@ const PatientDetails = () => {
     patient.videoUrl.includes('youtube.com') || 
     patient.videoUrl.includes('youtu.be')
   );
+
+  const openLightbox = (index) => {
+    setCurrentImageIndex(index);
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+  };
+
+  const nextImage = () => {
+    if (!patient?.gallery) return;
+    setCurrentImageIndex((prev) => 
+      prev === patient.gallery.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const prevImage = () => {
+    if (!patient?.gallery) return;
+    setCurrentImageIndex((prev) => 
+      prev === 0 ? patient.gallery.length - 1 : prev - 1
+    );
+  };
 
   if (loading) {
     return (
@@ -140,7 +193,13 @@ const PatientDetails = () => {
               <img
                 src={patient.image}
                 alt={patient.name}
-                className="w-full h-64 md:h-80 object-cover rounded-2xl shadow-2xl"
+                className="w-full h-64 md:h-80 object-cover rounded-2xl shadow-2xl cursor-pointer"
+                onClick={() => {
+                  // Create combined gallery with main image first
+                  const allImages = [patient.image, ...(patient.gallery || [])];
+                  patient.gallery = allImages;
+                  openLightbox(0);
+                }}
               />
             </div>
           </div>
@@ -176,7 +235,7 @@ const PatientDetails = () => {
                 </p>
               </div>
 
-              {/* Treatment Plan - Only show if there are treatment details */}
+              {/* Treatment Plan */}
               {(patient.hospitalName || patient.treatmentPlan || patient.stage || patient.daysLeft) && (
                 <div className="bg-neutral-light rounded-2xl p-8">
                   <h2 className="text-2xl font-bold text-dark mb-6 font-heading flex items-center gap-2">
@@ -215,7 +274,7 @@ const PatientDetails = () => {
                 </div>
               )}
 
-              {/* Video Section - Only show if video exists */}
+              {/* Video Section */}
               {patient.videoUrl && (
                 <div className="bg-white rounded-2xl shadow-lg p-8 border border-primary-light border-opacity-20">
                   <h2 className="text-2xl font-bold text-dark mb-6 font-heading flex items-center gap-2">
@@ -262,7 +321,7 @@ const PatientDetails = () => {
                 </div>
               )}
 
-              {/* Photo Gallery - Only show if gallery exists */}
+              {/* Photo Gallery */}
               {patient.gallery && patient.gallery.length > 0 && (
                 <div className="bg-white rounded-2xl shadow-lg p-8 border border-primary-light border-opacity-20">
                   <h2 className="text-2xl font-bold text-dark mb-6 font-heading">Photo Gallery</h2>
@@ -273,7 +332,7 @@ const PatientDetails = () => {
                         src={img}
                         alt={`${patient.name} photo ${index + 1}`}
                         className="w-full h-40 md:h-48 object-cover rounded-xl cursor-pointer shadow-md hover:scale-105 transition-transform"
-                        onClick={() => window.open(img, '_blank')}
+                        onClick={() => openLightbox(index)}
                       />
                     ))}
                   </div>
@@ -320,7 +379,6 @@ const PatientDetails = () => {
                     Send your donation via cryptocurrency. Choose your preferred network below.
                   </p>
 
-                  {/* Bitcoin */}
                   <div className="mb-4 p-4 bg-neutral-light rounded-xl">
                     <p className="text-sm font-bold text-dark mb-2 font-heading">Bitcoin (BTC)</p>
                     <div className="bg-white rounded-lg p-3 mb-2 break-all">
@@ -329,7 +387,6 @@ const PatientDetails = () => {
                     <CopyButton text={CRYPTO_ADDRESSES.bitcoin} label="Copy BTC Address" />
                   </div>
 
-                  {/* USDT TRC20 */}
                   <div className="mb-4 p-4 bg-neutral-light rounded-xl">
                     <p className="text-sm font-bold text-dark mb-2 font-heading">USDT (TRC20)</p>
                     <div className="bg-white rounded-lg p-3 mb-2 break-all">
@@ -338,7 +395,6 @@ const PatientDetails = () => {
                     <CopyButton text={CRYPTO_ADDRESSES.usdt} label="Copy USDT Address" />
                   </div>
 
-                  {/* BNB */}
                   <div className="mb-4 p-4 bg-neutral-light rounded-xl">
                     <p className="text-sm font-bold text-dark mb-2 font-heading">BNB (BSC)</p>
                     <div className="bg-white rounded-lg p-3 mb-2 break-all">
@@ -381,6 +437,68 @@ const PatientDetails = () => {
           </div>
         </div>
       </section>
+
+      {/* Lightbox */}
+      <AnimatePresence>
+        {lightboxOpen && patient.gallery && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black bg-opacity-95 flex items-center justify-center"
+            onClick={closeLightbox}
+          >
+            {/* Close button */}
+            <button
+              onClick={closeLightbox}
+              className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors z-10"
+              aria-label="Close gallery"
+            >
+              <X className="w-8 h-8" />
+            </button>
+
+            {/* Image counter */}
+            <div className="absolute top-4 left-4 text-white font-body text-sm z-10">
+              {currentImageIndex + 1} / {patient.gallery.length}
+            </div>
+
+            {/* Previous button */}
+            {patient.gallery.length > 1 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                className="absolute left-4 text-white hover:text-gray-300 transition-colors z-10"
+                aria-label="Previous image"
+              >
+                <ChevronLeft className="w-10 h-10" />
+              </button>
+            )}
+
+            {/* Image */}
+            <motion.img
+              key={currentImageIndex}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+              src={patient.gallery[currentImageIndex]}
+              alt={`${patient.name} photo ${currentImageIndex + 1}`}
+              className="max-h-[90vh] max-w-[90vw] object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+
+            {/* Next button */}
+            {patient.gallery.length > 1 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                className="absolute right-4 text-white hover:text-gray-300 transition-colors z-10"
+                aria-label="Next image"
+              >
+                <ChevronRight className="w-10 h-10" />
+              </button>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 };
