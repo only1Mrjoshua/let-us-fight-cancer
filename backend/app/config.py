@@ -34,6 +34,7 @@ class Settings:
             self.FRONTEND_URL_PROD,
             "http://localhost:5173",
             "http://localhost:3000",
+            "https://letusfightcancer.com",
         ]
 
 settings = Settings()
