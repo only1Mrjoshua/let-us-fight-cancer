@@ -5,6 +5,7 @@ import Home from './pages/Home/Home';
 import Donate from './pages/Donate/Donate';
 import PatientDetails from './pages/PatientDetails/PatientDetails';
 import GeneralFund from './pages/GeneralFund/GeneralFund';
+import About from './pages/About/About';
 import AdminLogin from './pages/Admin/AdminLogin';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import PatientForm from './pages/Admin/PatientForm';
@@ -23,7 +24,6 @@ function ProtectedRoute({ children }) {
   const token = localStorage.getItem('adminToken');
   
   if (!isLoggedIn || !token) {
-    // Clear any stale data
     localStorage.removeItem('isAdminLoggedIn');
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUsername');
@@ -44,6 +44,7 @@ function App() {
           <Route path="/donate" element={<Donate />} />
           <Route path="/patient/:id" element={<PatientDetails />} />
           <Route path="/general-fund" element={<GeneralFund />} />
+          <Route path="/about" element={<About />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLogin />} />

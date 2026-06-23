@@ -22,7 +22,7 @@ const Navbar = () => {
 
   const navItems = [
     { label: 'Home', sectionId: 'home', path: '/' },
-    { label: 'About', sectionId: 'mission', path: '/' },
+    { label: 'About', path: '/about' },
     { label: 'Patients', sectionId: 'patients', path: '/' },
     { label: 'Success Stories', sectionId: 'testimonials', path: '/' },
     { label: 'Contact', sectionId: 'footer', path: '/' },
@@ -31,22 +31,30 @@ const Navbar = () => {
   const handleNavClick = (item) => {
     setIsMobileMenuOpen(false);
     
+    // If it's the About page, navigate directly
+    if (item.path === '/about') {
+      navigate('/about');
+      return;
+    }
+    
     // If we're not on the home page, navigate to home first then scroll
     if (location.pathname !== '/') {
       navigate('/');
-      // Wait for navigation to complete, then scroll
       setTimeout(() => {
-        scrollToSection(item.sectionId);
+        if (item.sectionId) {
+          scrollToSection(item.sectionId);
+        }
       }, 150);
     } else {
       // If already on home page, just scroll
-      scrollToSection(item.sectionId);
+      if (item.sectionId) {
+        scrollToSection(item.sectionId);
+      }
     }
   };
 
   const handleDonateClick = () => {
     setIsMobileMenuOpen(false);
-    // Force scroll to top before navigating
     window.scrollTo(0, 0);
     navigate('/donate');
   };
