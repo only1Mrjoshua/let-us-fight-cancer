@@ -31,14 +31,12 @@ const PatientDetails = () => {
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch patient from backend
   useEffect(() => {
     if (id) {
       fetchPatient();
     }
   }, [id]);
 
-  // Scroll to top on mount and when id changes
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
@@ -55,7 +53,6 @@ const PatientDetails = () => {
     }
   };
 
-  // Check if video is a YouTube URL or uploaded file
   const isYouTubeUrl = patient?.videoUrl && (
     patient.videoUrl.includes('youtube.com') || 
     patient.videoUrl.includes('youtu.be')
@@ -125,12 +122,14 @@ const PatientDetails = () => {
                 {patient.name}
               </h1>
               <div className="flex items-center gap-4 text-white text-opacity-90 mb-6 flex-wrap">
-                <span className="flex items-center gap-1 font-body">
-                  <MapPin className="w-4 h-4" />
-                  {patient.location}
-                </span>
+                {patient.location && (
+                  <span className="flex items-center gap-1 font-body">
+                    <MapPin className="w-4 h-4" />
+                    {patient.location}
+                  </span>
+                )}
                 <span className="font-body">{patient.age} years old</span>
-                <span className="font-body">{patient.stage}</span>
+                {patient.stage && <span className="font-body">{patient.stage}</span>}
               </div>
               <p className="text-lg text-white text-opacity-90 font-body">
                 {patient.shortStory}
@@ -177,34 +176,44 @@ const PatientDetails = () => {
                 </p>
               </div>
 
-              {/* Treatment Plan */}
-              <div className="bg-neutral-light rounded-2xl p-8">
-                <h2 className="text-2xl font-bold text-dark mb-6 font-heading flex items-center gap-2">
-                  <Building2 className="w-6 h-6 text-primary-dark" />
-                  Treatment Plan
-                </h2>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-neutral-gray font-body">Hospital</p>
-                    <p className="text-dark font-semibold font-body">{patient.hospitalName}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-neutral-gray font-body">Treatment</p>
-                    <p className="text-dark font-semibold font-body">{patient.treatmentPlan}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-neutral-gray font-body">Stage</p>
-                    <p className="text-dark font-semibold font-body">{patient.stage}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-neutral-gray font-body">Time Remaining</p>
-                    <p className="text-dark font-semibold font-body flex items-center gap-1">
-                      <Clock className="w-4 h-4 text-primary-dark" />
-                      {patient.daysLeft} days left to reach goal
-                    </p>
+              {/* Treatment Plan - Only show if there are treatment details */}
+              {(patient.hospitalName || patient.treatmentPlan || patient.stage || patient.daysLeft) && (
+                <div className="bg-neutral-light rounded-2xl p-8">
+                  <h2 className="text-2xl font-bold text-dark mb-6 font-heading flex items-center gap-2">
+                    <Building2 className="w-6 h-6 text-primary-dark" />
+                    Treatment Plan
+                  </h2>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {patient.hospitalName && (
+                      <div>
+                        <p className="text-sm text-neutral-gray font-body">Hospital</p>
+                        <p className="text-dark font-semibold font-body">{patient.hospitalName}</p>
+                      </div>
+                    )}
+                    {patient.treatmentPlan && (
+                      <div>
+                        <p className="text-sm text-neutral-gray font-body">Treatment</p>
+                        <p className="text-dark font-semibold font-body">{patient.treatmentPlan}</p>
+                      </div>
+                    )}
+                    {patient.stage && (
+                      <div>
+                        <p className="text-sm text-neutral-gray font-body">Stage</p>
+                        <p className="text-dark font-semibold font-body">{patient.stage}</p>
+                      </div>
+                    )}
+                    {patient.daysLeft !== undefined && patient.daysLeft !== null && (
+                      <div>
+                        <p className="text-sm text-neutral-gray font-body">Time Remaining</p>
+                        <p className="text-dark font-semibold font-body flex items-center gap-1">
+                          <Clock className="w-4 h-4 text-primary-dark" />
+                          {patient.daysLeft} days left to reach goal
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Video Section - Only show if video exists */}
               {patient.videoUrl && (
@@ -253,7 +262,7 @@ const PatientDetails = () => {
                 </div>
               )}
 
-              {/* Photo Gallery */}
+              {/* Photo Gallery - Only show if gallery exists */}
               {patient.gallery && patient.gallery.length > 0 && (
                 <div className="bg-white rounded-2xl shadow-lg p-8 border border-primary-light border-opacity-20">
                   <h2 className="text-2xl font-bold text-dark mb-6 font-heading">Photo Gallery</h2>
@@ -298,7 +307,7 @@ const PatientDetails = () => {
                   </div>
                 </div>
 
-                {/* Crypto Payment Details - Hardcoded */}
+                {/* Crypto Payment Details */}
                 <div className="border-t border-neutral-light pt-6">
                   <h4 className="text-lg font-bold text-dark mb-4 font-heading flex items-center gap-2">
                     <svg className="w-5 h-5 text-primary-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -313,9 +322,7 @@ const PatientDetails = () => {
 
                   {/* Bitcoin */}
                   <div className="mb-4 p-4 bg-neutral-light rounded-xl">
-                    <p className="text-sm font-bold text-dark mb-2 font-heading">
-                      Bitcoin (BTC)
-                    </p>
+                    <p className="text-sm font-bold text-dark mb-2 font-heading">Bitcoin (BTC)</p>
                     <div className="bg-white rounded-lg p-3 mb-2 break-all">
                       <p className="text-xs text-dark font-mono">{CRYPTO_ADDRESSES.bitcoin}</p>
                     </div>
@@ -324,9 +331,7 @@ const PatientDetails = () => {
 
                   {/* USDT TRC20 */}
                   <div className="mb-4 p-4 bg-neutral-light rounded-xl">
-                    <p className="text-sm font-bold text-dark mb-2 font-heading">
-                      USDT (TRC20)
-                    </p>
+                    <p className="text-sm font-bold text-dark mb-2 font-heading">USDT (TRC20)</p>
                     <div className="bg-white rounded-lg p-3 mb-2 break-all">
                       <p className="text-xs text-dark font-mono">{CRYPTO_ADDRESSES.usdt}</p>
                     </div>
@@ -335,9 +340,7 @@ const PatientDetails = () => {
 
                   {/* BNB */}
                   <div className="mb-4 p-4 bg-neutral-light rounded-xl">
-                    <p className="text-sm font-bold text-dark mb-2 font-heading">
-                      BNB (BSC)
-                    </p>
+                    <p className="text-sm font-bold text-dark mb-2 font-heading">BNB (BSC)</p>
                     <div className="bg-white rounded-lg p-3 mb-2 break-all">
                       <p className="text-xs text-dark font-mono">{CRYPTO_ADDRESSES.bnb}</p>
                     </div>

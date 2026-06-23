@@ -80,7 +80,7 @@ const PatientForm = ({ isEditing = false }) => {
         setLoading(true);
         const result = await api.upload.image(file);
         setMainImagePreview(result.url);
-        setMainImage(null); // No need to keep file reference
+        setMainImage(null);
       } catch (err) {
         alert('Failed to upload image: ' + err.message);
       } finally {
@@ -213,8 +213,8 @@ const PatientForm = ({ isEditing = false }) => {
                   className="w-full px-4 py-3 border border-neutral-light rounded-xl focus:outline-none focus:border-primary-dark font-body" />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-dark mb-2 font-body">Location *</label>
-                <input type="text" name="location" value={formData.location} onChange={handleChange} required
+                <label className="block text-sm font-semibold text-dark mb-2 font-body">Location (Optional)</label>
+                <input type="text" name="location" value={formData.location} onChange={handleChange}
                   className="w-full px-4 py-3 border border-neutral-light rounded-xl focus:outline-none focus:border-primary-dark font-body" />
               </div>
             </div>
@@ -256,13 +256,13 @@ const PatientForm = ({ isEditing = false }) => {
                   className="w-full px-4 py-3 border border-neutral-light rounded-xl focus:outline-none focus:border-primary-dark font-body" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-dark mb-2 font-body">Hospital Name *</label>
-                <input type="text" name="hospitalName" value={formData.hospitalName} onChange={handleChange} required
+                <label className="block text-sm font-semibold text-dark mb-2 font-body">Hospital Name (Optional)</label>
+                <input type="text" name="hospitalName" value={formData.hospitalName} onChange={handleChange}
                   className="w-full px-4 py-3 border border-neutral-light rounded-xl focus:outline-none focus:border-primary-dark font-body" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-dark mb-2 font-body">Treatment Plan *</label>
-                <input type="text" name="treatmentPlan" value={formData.treatmentPlan} onChange={handleChange} required
+                <label className="block text-sm font-semibold text-dark mb-2 font-body">Treatment Plan (Optional)</label>
+                <input type="text" name="treatmentPlan" value={formData.treatmentPlan} onChange={handleChange}
                   className="w-full px-4 py-3 border border-neutral-light rounded-xl focus:outline-none focus:border-primary-dark font-body" />
               </div>
             </div>
