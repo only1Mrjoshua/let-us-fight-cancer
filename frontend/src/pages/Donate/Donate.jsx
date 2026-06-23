@@ -200,6 +200,7 @@ const Donate = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/general-fund')}
               className="btn-primary bg-white text-primary-dark hover:bg-opacity-90 text-lg px-10 py-4 flex items-center gap-2 mx-auto"
             >
               <Heart className="w-6 h-6" />

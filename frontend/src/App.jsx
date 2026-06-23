@@ -4,6 +4,7 @@ import { PatientProvider } from './context/PatientContext';
 import Home from './pages/Home/Home';
 import Donate from './pages/Donate/Donate';
 import PatientDetails from './pages/PatientDetails/PatientDetails';
+import GeneralFund from './pages/GeneralFund/GeneralFund';
 import AdminLogin from './pages/Admin/AdminLogin';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import PatientForm from './pages/Admin/PatientForm';
@@ -42,6 +43,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/donate" element={<Donate />} />
           <Route path="/patient/:id" element={<PatientDetails />} />
+          <Route path="/general-fund" element={<GeneralFund />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLogin />} />
