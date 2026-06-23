@@ -1,0 +1,9 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://letusfightcancer.com/sitemap.xml
+
+# Disallow admin pages from indexing
+Disallow: /admin

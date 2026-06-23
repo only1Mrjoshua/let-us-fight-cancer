@@ -34,6 +34,7 @@ class Settings:
             "http://localhost:5173",
             "http://localhost:3000",
             "https://letusfightcancer.com",
+            "https://www.letusfightcancer.com",
             "https://let-us-fight-cancer.onrender.com"
         ]
 
