@@ -356,7 +356,7 @@ const PatientDetails = () => {
                       <div>
                         <p className="text-sm font-bold text-dark mb-1 font-heading">Questions or Alternative Payment?</p>
                         <p className="text-xs text-neutral-gray mb-2 font-body">
-                          Contact us for other payment options or inquiries about this patient.
+                          Contact us for other payment options or inquiries about this patient
                         </p>
                         <a 
                           href={`mailto:donations@letusfightcancer.com?subject=Donation%20Inquiry%20-%20Patient%20ID%20${patient.id}`}
