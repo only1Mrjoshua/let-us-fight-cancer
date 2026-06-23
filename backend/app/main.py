@@ -9,11 +9,9 @@ import traceback
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
     print("Starting up...")
     await Database.connect_db()
     yield
-    # Shutdown
     print("Shutting down...")
     await Database.close_db()
 
@@ -24,17 +22,10 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS Middleware - ADD THIS FIRST before anything else
+# CORS - Allow ALL origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "https://letusfightcancer.com",
-        "https://www.letusfightcancer.com",
-        "https://let-us-fight-cancer.onrender.com",
-        "https://let-us-fight-cancer-api.onrender.com",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -50,7 +41,6 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"detail": f"Internal Server Error: {str(exc)}"}
     )
 
-# Include routers
 app.include_router(admin.router)
 app.include_router(patients.router)
 app.include_router(site_content.router)
