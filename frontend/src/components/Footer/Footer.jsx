@@ -70,7 +70,7 @@ const Footer = () => {
         {/* Copyright */}
         <div className="mt-12 pt-8 border-t border-white border-opacity-10 text-center">
           <p className="text-neutral-gray font-body">
-            &copy; 2016 - {new Date().getFullYear()} Let Us Fight Cancer. All Rights Reserved.
+            &copy; 2016 Let Us Fight Cancer. All Rights Reserved.
           </p>
         </div>
       </div>
