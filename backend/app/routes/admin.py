@@ -1,15 +1,13 @@
 from fastapi import APIRouter, HTTPException, status
 from datetime import datetime, timedelta
 from jose import jwt
-from passlib.context import CryptContext
+from passlib.hash import bcrypt
 from ..config import settings
 from ..database import get_admins_collection
 from ..models.admin import AdminLogin
 import traceback
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def create_access_token(data: dict):
     to_encode = data.copy()
@@ -23,16 +21,25 @@ def create_access_token(data: dict):
     return encoded_jwt
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    # bcrypt max password length is 72 bytes
-    if len(plain_password.encode()) > 72:
-        plain_password = plain_password[:72]
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        # Truncate password to 72 bytes for bcrypt
+        password_bytes = plain_password.encode('utf-8')
+        if len(password_bytes) > 72:
+            password_bytes = password_bytes[:72]
+        return bcrypt.verify(password_bytes, hashed_password)
+    except Exception as e:
+        print(f"Password verification error: {e}")
+        return False
 
 @router.post("/login")
 async def admin_login(login_data: AdminLogin):
     try:
+        print(f"Login attempt: {login_data.username}")
+        
         admins_collection = await get_admins_collection()
         admin = await admins_collection.find_one({"username": login_data.username})
+        
+        print(f"Admin found: {admin is not None}")
         
         if not admin:
             raise HTTPException(
@@ -40,13 +47,17 @@ async def admin_login(login_data: AdminLogin):
                 detail="Invalid username or password"
             )
         
-        if not verify_password(login_data.password, admin["password"]):
+        password_ok = verify_password(login_data.password, admin["password"])
+        print(f"Password ok: {password_ok}")
+        
+        if not password_ok:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid username or password"
             )
         
         access_token = create_access_token(data={"sub": admin["username"]})
+        print("Login successful")
         
         return {
             "access_token": access_token,
