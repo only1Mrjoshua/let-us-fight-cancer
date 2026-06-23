@@ -59,7 +59,7 @@ const About = () => {
             <p className="text-dark leading-relaxed mb-4 font-body">
               Our platform connects compassionate donors with verified cancer patients, ensuring 
               that funds go directly to treatment costs. We use cryptocurrency for fast, borderless 
-              donations with minimal fees, making every contribution count.
+              donations, making every contribution count.
             </p>
 
             <h2 className="text-2xl font-bold text-dark mb-4 font-heading">Transparency Promise</h2>
