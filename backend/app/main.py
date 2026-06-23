@@ -1,9 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from .config import settings
 from .database import Database
 from .routes import admin, patients, site_content, upload
+import traceback
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,14 +24,31 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS Middleware
+# CORS Middleware - ADD THIS FIRST before anything else
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://letusfightcancer.com",
+        "https://www.letusfightcancer.com",
+        "https://let-us-fight-cancer.onrender.com",
+        "https://let-us-fight-cancer-api.onrender.com",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Global exception handler
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    print(f"Error: {str(exc)}")
+    print(traceback.format_exc())
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal Server Error: {str(exc)}"}
+    )
 
 # Include routers
 app.include_router(admin.router)
