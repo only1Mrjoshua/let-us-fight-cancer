@@ -50,7 +50,7 @@ const GeneralFund = () => {
             <div className="bg-neutral-light rounded-2xl p-8 mb-8">
               <p className="text-lg text-dark leading-relaxed font-body mb-4">
                 Every donation, no matter the size, is a lifeline to someone fighting cancer. 
-                When you give, you're not just sending money — you're sending hope to a mother 
+                When you give, you're not just sending money, you're sending hope to a mother 
                 who wants to see her children grow up, a father who dreams of walking his daughter 
                 down the aisle, a child who deserves a chance at life.
               </p>
@@ -60,7 +60,7 @@ const GeneralFund = () => {
                 the treatment that will save their loved one's life.
               </p>
               <p className="text-lg text-dark leading-relaxed font-body">
-                From the bottom of our hearts — and from every patient and family you help — 
+                From the bottom of our hearts, and from every patient and family you help, 
                 <strong className="text-primary-dark"> thank you.</strong> You are the reason 
                 hope exists. You are the reason people fight on.
               </p>
