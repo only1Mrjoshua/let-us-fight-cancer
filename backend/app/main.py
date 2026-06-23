@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
+from starlette.middleware.cors import CORSMiddleware as StarletteCORSMiddleware
 from .config import settings
 from .database import Database
 from .routes import admin, patients, site_content, upload
@@ -22,24 +23,23 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS - Allow ALL origins
+# CORS - Using both approaches to ensure it works
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Global exception handler
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    print(f"Error: {str(exc)}")
-    print(traceback.format_exc())
-    return JSONResponse(
-        status_code=500,
-        content={"detail": f"Internal Server Error: {str(exc)}"}
-    )
+# Add CORS headers to all responses as backup
+@app.middleware("http")
+async def add_cors_header(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
 
 app.include_router(admin.router)
 app.include_router(patients.router)
