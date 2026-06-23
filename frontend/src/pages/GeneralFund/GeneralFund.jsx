@@ -8,9 +8,9 @@ import CopyButton from '../../components/CopyButton/CopyButton';
 
 // Hardcoded crypto addresses
 const CRYPTO_ADDRESSES = {
-  bitcoin: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
-  usdt: "TXtGQm9LZwGJ7K3mPq4g8B3hFv8cN2rD5s",
-  bnb: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1",
+  bitcoin: "bc1ppwfe72mz7sj7yeg76evhghmzfye5rkrmuwwrj9znntzfpdmydf3smxf4x8",
+  usdt: "TJP65KbZj5SwKCfFJuiHcqwcyM45F6LQgE",
+  bnb: "0x97274e58fbba80198bd0ce5490caafd363806e2a",
 };
 
 const GeneralFund = () => {
