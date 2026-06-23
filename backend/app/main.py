@@ -7,7 +7,6 @@ from .routes import admin, patients, site_content, upload
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Startup and shutdown events"""
     # Startup
     print("Starting up...")
     await Database.connect_db()

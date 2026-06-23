@@ -26,7 +26,6 @@ class Settings:
     FRONTEND_URL_DEV: str = os.getenv("FRONTEND_URL_DEV", "http://localhost:3000")
     FRONTEND_URL_PROD: str = os.getenv("FRONTEND_URL_PROD", "https://let-us-fight-cancer.onrender.com")
     
-    # CORS Origins
     @property
     def cors_origins(self):
         return [
@@ -35,6 +34,7 @@ class Settings:
             "http://localhost:5173",
             "http://localhost:3000",
             "https://letusfightcancer.com",
+            "https://let-us-fight-cancer.onrender.com"
         ]
 
 settings = Settings()
