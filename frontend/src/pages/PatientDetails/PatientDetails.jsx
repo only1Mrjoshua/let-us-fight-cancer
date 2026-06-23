@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import DonationProgressBar from '../../components/DonationProgressBar/DonationProgressBar';
 import CopyButton from '../../components/CopyButton/CopyButton';
-import { usePatients } from '../../context/PatientContext';
+import { api } from '../../services/api';
 
 // Hardcoded crypto addresses
 const CRYPTO_ADDRESSES = {
@@ -28,20 +28,46 @@ const PatientDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [activeVideo, setActiveVideo] = useState(false);
-  const { getPatient } = usePatients();
+  const [patient, setPatient] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch patient from backend
+  useEffect(() => {
+    if (id) {
+      fetchPatient();
+    }
+  }, [id]);
 
   // Scroll to top on mount and when id changes
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
 
-  const patient = getPatient(id);
+  const fetchPatient = async () => {
+    try {
+      const data = await api.patients.getOnePublic(id);
+      setPatient(data);
+    } catch (err) {
+      console.error('Failed to fetch patient:', err);
+      setPatient(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Check if video is a YouTube URL or uploaded file
   const isYouTubeUrl = patient?.videoUrl && (
     patient.videoUrl.includes('youtube.com') || 
     patient.videoUrl.includes('youtu.be')
   );
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-white flex items-center justify-center">
+        <p className="text-neutral-gray font-body">Loading...</p>
+      </main>
+    );
+  }
 
   if (!patient) {
     return (
@@ -251,22 +277,22 @@ const PatientDetails = () => {
               <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-primary-light">
                 <h3 className="text-xl font-bold text-dark mb-4 font-heading">Donation Progress</h3>
                 <DonationProgressBar 
-                  raised={patient.amountRaised} 
-                  needed={patient.amountNeeded} 
+                  raised={patient.amountRaised || 0} 
+                  needed={patient.amountNeeded || 0} 
                 />
                 
                 <div className="grid grid-cols-2 gap-4 my-6">
                   <div className="bg-neutral-light rounded-xl p-4 text-center">
                     <DollarSign className="w-6 h-6 text-primary-dark mx-auto mb-2" />
                     <p className="text-lg font-bold text-dark font-heading">
-                      ${(patient.amountNeeded / 1000).toFixed(0)}K
+                      ${((patient.amountNeeded || 0) / 1000).toFixed(0)}K
                     </p>
                     <p className="text-xs text-neutral-gray font-body">Goal</p>
                   </div>
                   <div className="bg-neutral-light rounded-xl p-4 text-center">
                     <Users className="w-6 h-6 text-primary-dark mx-auto mb-2" />
                     <p className="text-lg font-bold text-dark font-heading">
-                      ${(patient.amountRaised / 1000).toFixed(0)}K
+                      ${((patient.amountRaised || 0) / 1000).toFixed(0)}K
                     </p>
                     <p className="text-xs text-neutral-gray font-body">Raised</p>
                   </div>

@@ -2,22 +2,34 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Shield, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { api } from '../../services/api';
 
 const AdminLogin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Simple demo authentication - change these credentials
-    if (username === 'admin' && password === 'admin123') {
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await api.admin.login(username, password);
+      
+      // Store token and login state
+      localStorage.setItem('adminToken', response.access_token);
       localStorage.setItem('isAdminLoggedIn', 'true');
+      localStorage.setItem('adminUsername', username);
+      
       navigate('/admin/dashboard');
-    } else {
-      setError('Invalid username or password');
+    } catch (err) {
+      setError(err.message || 'Invalid username or password');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,6 +81,7 @@ const AdminLogin = () => {
               className="w-full px-4 py-3 border border-neutral-light rounded-xl focus:outline-none focus:border-primary-dark transition-colors font-body"
               placeholder="Enter username"
               required
+              disabled={loading}
             />
           </div>
 
@@ -84,11 +97,13 @@ const AdminLogin = () => {
                 className="w-full px-4 py-3 border border-neutral-light rounded-xl focus:outline-none focus:border-primary-dark transition-colors font-body pr-12"
                 placeholder="Enter password"
                 required
+                disabled={loading}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-gray hover:text-dark transition-colors"
+                disabled={loading}
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
@@ -97,16 +112,17 @@ const AdminLogin = () => {
 
           <motion.button
             type="submit"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full bg-primary-dark text-white py-3 rounded-xl font-semibold hover:bg-opacity-90 transition-all font-body shadow-lg"
+            whileHover={{ scale: loading ? 1 : 1.02 }}
+            whileTap={{ scale: loading ? 1 : 0.98 }}
+            disabled={loading}
+            className="w-full bg-primary-dark text-white py-3 rounded-xl font-semibold hover:bg-opacity-90 transition-all font-body shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Sign In
+            {loading ? 'Signing in...' : 'Sign In'}
           </motion.button>
         </form>
 
         <p className="text-xs text-neutral-gray text-center mt-6 font-body">
-          Demo: username: <strong>admin</strong> | password: <strong>admin123</strong>
+          Secure admin access
         </p>
       </motion.div>
     </main>

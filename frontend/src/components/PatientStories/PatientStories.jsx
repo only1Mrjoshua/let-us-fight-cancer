@@ -1,12 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Clock } from 'lucide-react';
-import { patients } from '../../data/patientData';
 import DonationProgressBar from '../DonationProgressBar/DonationProgressBar';
+import { api } from '../../services/api';
 
 const PatientStories = () => {
   const navigate = useNavigate();
+  const [patients, setPatients] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  const fetchPatients = async () => {
+    try {
+      const data = await api.patients.getAllPublic();
+      // Get only the most recent 3 patients
+      const recentPatients = data.slice(0, 3);
+      setPatients(recentPatients);
+    } catch (err) {
+      console.error('Failed to fetch patients:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <section id="patients" className="section-padding bg-white">
@@ -26,66 +45,76 @@ const PatientStories = () => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {patients.map((patient, index) => (
-            <motion.div
-              key={patient.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.2, duration: 0.6 }}
-              whileHover={{ y: -8 }}
-              className="bg-white rounded-2xl shadow-xl overflow-hidden border border-primary-light border-opacity-20 group"
-            >
-              {/* Patient Image */}
-              <div className="relative h-48 overflow-hidden">
-                <img
-                  src={patient.image}
-                  alt={`${patient.name}, ${patient.cancerType} patient`}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-dark to-transparent opacity-40" />
-                <div className="absolute bottom-4 left-4">
-                  <span className="px-3 py-1 bg-white bg-opacity-90 rounded-full text-xs font-semibold text-primary-dark font-body">
-                    {patient.cancerType}
-                  </span>
-                </div>
-              </div>
-
-              {/* Patient Info */}
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-dark mb-1 font-heading">{patient.name}</h3>
-                <p className="text-sm text-neutral-gray mb-4 font-body">{patient.location}</p>
-                
-                <p className="text-dark text-opacity-80 mb-6 leading-relaxed text-sm font-body line-clamp-3">
-                  {patient.story}
-                </p>
-
-                <DonationProgressBar 
-                  raised={patient.amountRaised} 
-                  needed={patient.amountNeeded} 
-                />
-
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-neutral-light">
-                  <div className="flex items-center gap-2 text-sm text-neutral-gray font-body">
-                    <Clock className="w-4 h-4" aria-hidden="true" />
-                    <span>{patient.daysLeft} days left</span>
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-neutral-gray font-body">Loading patients...</p>
+          </div>
+        ) : patients.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-neutral-gray font-body">No patients currently listed.</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-8">
+            {patients.map((patient, index) => (
+              <motion.div
+                key={patient.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.2, duration: 0.6 }}
+                whileHover={{ y: -8 }}
+                className="bg-white rounded-2xl shadow-xl overflow-hidden border border-primary-light border-opacity-20 group"
+              >
+                {/* Patient Image */}
+                <div className="relative h-48 overflow-hidden">
+                  <img
+                    src={patient.image}
+                    alt={`${patient.name}, ${patient.cancerType} patient`}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-dark to-transparent opacity-40" />
+                  <div className="absolute bottom-4 left-4">
+                    <span className="px-3 py-1 bg-white bg-opacity-90 rounded-full text-xs font-semibold text-primary-dark font-body">
+                      {patient.cancerType}
+                    </span>
                   </div>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => navigate(`/patient/${patient.id}`)}
-                    className="flex items-center gap-2 text-primary-dark font-semibold text-sm hover:text-opacity-80 transition-colors font-body"
-                    aria-label={`View more about ${patient.name}`}
-                  >
-                    View More
-                    <ArrowRight className="w-4 h-4" aria-hidden="true" />
-                  </motion.button>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+
+                {/* Patient Info */}
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-dark mb-1 font-heading">{patient.name}</h3>
+                  <p className="text-sm text-neutral-gray mb-4 font-body">{patient.location}</p>
+                  
+                  <p className="text-dark text-opacity-80 mb-6 leading-relaxed text-sm font-body line-clamp-3">
+                    {patient.shortStory || patient.story}
+                  </p>
+
+                  <DonationProgressBar 
+                    raised={patient.amountRaised || 0} 
+                    needed={patient.amountNeeded || 0} 
+                  />
+
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-neutral-light">
+                    <div className="flex items-center gap-2 text-sm text-neutral-gray font-body">
+                      <Clock className="w-4 h-4" aria-hidden="true" />
+                      <span>{patient.daysLeft} days left</span>
+                    </div>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => navigate(`/patient/${patient.id}`)}
+                      className="flex items-center gap-2 text-primary-dark font-semibold text-sm hover:text-opacity-80 transition-colors font-body"
+                      aria-label={`View more about ${patient.name}`}
+                    >
+                      View More
+                      <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
         
         {/* See All Patients Button */}
         <motion.div 

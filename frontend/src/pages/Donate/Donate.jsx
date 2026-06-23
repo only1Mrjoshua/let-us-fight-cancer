@@ -1,15 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Heart, ArrowRight, Clock, MapPin, Users } from 'lucide-react';
 import Navbar from '../../components/Navbar/Navbar';
 import Footer from '../../components/Footer/Footer';
 import DonationProgressBar from '../../components/DonationProgressBar/DonationProgressBar';
-import { usePatients } from '../../context/PatientContext';
+import { api } from '../../services/api';
 
 const Donate = () => {
   const navigate = useNavigate();
-  const { patients } = usePatients();
+  const [patients, setPatients] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  const fetchPatients = async () => {
+    try {
+      const data = await api.patients.getAllPublic();
+      setPatients(data);
+    } catch (err) {
+      console.error('Failed to fetch patients:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main>
@@ -74,7 +90,11 @@ const Donate = () => {
             </p>
           </motion.div>
 
-          {patients.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-neutral-gray font-body">Loading patients...</p>
+            </div>
+          ) : patients.length === 0 ? (
             <div className="text-center py-12">
               <Heart className="w-16 h-16 text-primary-light mx-auto mb-4" />
               <p className="text-xl text-neutral-gray font-body">No patients currently listed. Check back soon.</p>
@@ -135,8 +155,8 @@ const Donate = () => {
                     </p>
 
                     <DonationProgressBar 
-                      raised={patient.amountRaised} 
-                      needed={patient.amountNeeded} 
+                      raised={patient.amountRaised || 0} 
+                      needed={patient.amountNeeded || 0} 
                     />
 
                     <div className="flex items-center justify-between mt-4 pt-4 border-t border-neutral-light">

@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Save, Upload, X, Image, Video, Plus, Trash2 } from 'lucide-react';
-import { usePatients } from '../../context/PatientContext';
+import { ArrowLeft, Save, Upload, X, Video, Plus } from 'lucide-react';
+import { api } from '../../services/api';
 
 const PatientForm = ({ isEditing = false }) => {
   const { id } = useParams();
-  const { patients, addPatient, updatePatient, getPatient } = useNavigate();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -31,13 +30,18 @@ const PatientForm = ({ isEditing = false }) => {
   const [galleryPreviews, setGalleryPreviews] = useState([]);
   const [videoFile, setVideoFile] = useState(null);
   const [videoPreview, setVideoPreview] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  // Correct the usePatients destructuring
-  const patientContext = usePatients();
-
+  // Fetch patient data if editing
   useEffect(() => {
     if (isEditing && id) {
-      const patient = patientContext.getPatient(id);
+      fetchPatient();
+    }
+  }, [isEditing, id]);
+
+  const fetchPatient = async () => {
+    try {
+      const patient = await api.adminPatients.getOne(id);
       if (patient) {
         setFormData({
           name: patient.name || '',
@@ -58,35 +62,46 @@ const PatientForm = ({ isEditing = false }) => {
         setGalleryPreviews(patient.gallery || []);
         setVideoPreview(patient.videoUrl || '');
       }
+    } catch (err) {
+      alert('Failed to fetch patient: ' + err.message);
+      navigate('/admin/dashboard');
     }
-  }, [isEditing, id, patientContext]);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleMainImageUpload = (e) => {
+  const handleMainImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      setMainImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setMainImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+      try {
+        setLoading(true);
+        const result = await api.upload.image(file);
+        setMainImagePreview(result.url);
+        setMainImage(null); // No need to keep file reference
+      } catch (err) {
+        alert('Failed to upload image: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
-  const handleGalleryUpload = (e) => {
+  const handleGalleryUpload = async (e) => {
     const files = Array.from(e.target.files);
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setGalleryPreviews(prev => [...prev, reader.result]);
-      };
-      reader.readAsDataURL(file);
-    });
+    for (const file of files) {
+      try {
+        setLoading(true);
+        const result = await api.upload.image(file);
+        setGalleryPreviews(prev => [...prev, result.url]);
+      } catch (err) {
+        alert('Failed to upload gallery image: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
     setGalleryImages(prev => [...prev, ...files]);
   };
 
@@ -95,12 +110,19 @@ const PatientForm = ({ isEditing = false }) => {
     setGalleryImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleVideoUpload = (e) => {
+  const handleVideoUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      setVideoFile(file);
-      const url = URL.createObjectURL(file);
-      setVideoPreview(url);
+      try {
+        setLoading(true);
+        const result = await api.upload.video(file);
+        setVideoPreview(result.url);
+        setVideoFile(null);
+      } catch (err) {
+        alert('Failed to upload video: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -111,14 +133,12 @@ const PatientForm = ({ isEditing = false }) => {
 
   const removeVideo = () => {
     setVideoFile(null);
-    if (videoPreview) {
-      URL.revokeObjectURL(videoPreview);
-    }
     setVideoPreview('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     
     const patientData = {
       ...formData,
@@ -127,17 +147,22 @@ const PatientForm = ({ isEditing = false }) => {
       amountRaised: parseInt(formData.amountRaised),
       daysLeft: parseInt(formData.daysLeft),
       image: mainImagePreview || 'https://via.placeholder.com/400',
-      gallery: galleryPreviews.length > 0 ? galleryPreviews : ['https://via.placeholder.com/600x400'],
+      gallery: galleryPreviews.length > 0 ? galleryPreviews : [],
       videoUrl: videoPreview || '',
     };
 
-    if (isEditing) {
-      patientContext.updatePatient(parseInt(id), patientData);
-    } else {
-      patientContext.addPatient(patientData);
+    try {
+      if (isEditing) {
+        await api.adminPatients.update(id, patientData);
+      } else {
+        await api.adminPatients.create(patientData);
+      }
+      navigate('/admin/dashboard');
+    } catch (err) {
+      alert('Failed to save patient: ' + err.message);
+    } finally {
+      setLoading(false);
     }
-
-    navigate('/admin/dashboard');
   };
 
   return (
@@ -284,7 +309,7 @@ const PatientForm = ({ isEditing = false }) => {
                 <label className="flex flex-col items-center justify-center w-48 h-48 border-2 border-dashed border-neutral-light rounded-xl cursor-pointer hover:border-primary-dark transition-colors">
                   <Upload className="w-8 h-8 text-neutral-gray mb-2" />
                   <span className="text-sm text-neutral-gray font-body">Upload Photo</span>
-                  <input type="file" accept="image/*" onChange={handleMainImageUpload} className="hidden" required={!isEditing} />
+                  <input type="file" accept="image/*" onChange={handleMainImageUpload} className="hidden" required={!isEditing} disabled={loading} />
                 </label>
               )}
             </div>
@@ -310,7 +335,7 @@ const PatientForm = ({ isEditing = false }) => {
                 <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-neutral-light rounded-xl cursor-pointer hover:border-primary-dark transition-colors">
                   <Plus className="w-6 h-6 text-neutral-gray mb-1" />
                   <span className="text-xs text-neutral-gray font-body">Add</span>
-                  <input type="file" accept="image/*" multiple onChange={handleGalleryUpload} className="hidden" />
+                  <input type="file" accept="image/*" multiple onChange={handleGalleryUpload} className="hidden" disabled={loading} />
                 </label>
               </div>
             </div>
@@ -336,7 +361,7 @@ const PatientForm = ({ isEditing = false }) => {
                   <Video className="w-10 h-10 text-neutral-gray mb-2" />
                   <span className="text-sm text-neutral-gray font-body">Upload Video</span>
                   <span className="text-xs text-neutral-gray font-body mt-1">MP4, WebM, or OGG</span>
-                  <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
+                  <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" disabled={loading} />
                 </label>
               )}
             </div>
@@ -352,10 +377,15 @@ const PatientForm = ({ isEditing = false }) => {
               className="px-6 py-3 border border-neutral-light rounded-full text-neutral-gray hover:bg-neutral-light transition-colors font-body">
               Cancel
             </button>
-            <motion.button type="submit" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 bg-primary-dark text-white px-8 py-3 rounded-full font-semibold hover:bg-opacity-90 transition-all font-body shadow-lg">
+            <motion.button 
+              type="submit" 
+              whileHover={{ scale: loading ? 1 : 1.05 }} 
+              whileTap={{ scale: loading ? 1 : 0.95 }}
+              disabled={loading}
+              className="flex items-center gap-2 bg-primary-dark text-white px-8 py-3 rounded-full font-semibold hover:bg-opacity-90 transition-all font-body shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <Save className="w-5 h-5" />
-              {isEditing ? 'Update Patient' : 'Add Patient'}
+              {loading ? 'Saving...' : isEditing ? 'Update Patient' : 'Add Patient'}
             </motion.button>
           </div>
         </form>

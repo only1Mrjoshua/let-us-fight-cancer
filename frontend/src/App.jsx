@@ -19,9 +19,16 @@ function ScrollToTop() {
 
 function ProtectedRoute({ children }) {
   const isLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
-  if (!isLoggedIn) {
+  const token = localStorage.getItem('adminToken');
+  
+  if (!isLoggedIn || !token) {
+    // Clear any stale data
+    localStorage.removeItem('isAdminLoggedIn');
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUsername');
     return <Navigate to="/admin" replace />;
   }
+  
   return children;
 }
 

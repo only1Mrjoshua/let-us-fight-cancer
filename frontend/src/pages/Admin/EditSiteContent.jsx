@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Save, Upload, Plus, Trash2 } from 'lucide-react';
-import { usePatients } from '../../context/PatientContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Save, Upload, Plus, Trash2, CheckCircle } from 'lucide-react';
+import { api } from '../../services/api';
 
 const defaultStoryOfHope = {
   title: "A Story of Hope",
@@ -26,19 +26,34 @@ const defaultStoryOfHope = {
 
 const EditSiteContent = () => {
   const navigate = useNavigate();
-  const patientContext = usePatients();
   
-  const [storyData, setStoryData] = useState(() => {
-    // Initialize with context data or default
-    return patientContext?.storyOfHope || defaultStoryOfHope;
-  });
+  const [storyData, setStoryData] = useState(defaultStoryOfHope);
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [toast, setToast] = useState(null);
 
-  // Update local state when context changes
+  // Fetch story of hope from backend on mount
   useEffect(() => {
-    if (patientContext?.storyOfHope) {
-      setStoryData(patientContext.storyOfHope);
+    fetchStoryOfHope();
+  }, []);
+
+  const fetchStoryOfHope = async () => {
+    try {
+      const data = await api.siteContent.getStoryOfHope();
+      if (data && data.title) {
+        setStoryData(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch story of hope:', err);
+    } finally {
+      setFetching(false);
     }
-  }, [patientContext?.storyOfHope]);
+  };
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -63,29 +78,41 @@ const EditSiteContent = () => {
     setStoryData(prev => ({ ...prev, timeline: newTimeline }));
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setStoryData(prev => ({ ...prev, image: reader.result }));
-      };
-      reader.readAsDataURL(file);
+      try {
+        setLoading(true);
+        const result = await api.upload.image(file);
+        setStoryData(prev => ({ ...prev, image: result.url }));
+        showToast('Image uploaded successfully!', 'success');
+      } catch (err) {
+        showToast('Failed to upload image: ' + err.message, 'error');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (patientContext?.updateStoryOfHope) {
-      patientContext.updateStoryOfHope(storyData);
-      alert('Story of Hope updated successfully!');
-    } else {
-      alert('Error: Could not save changes. Please try again.');
+    setLoading(true);
+
+    try {
+      await api.siteContent.updateStoryOfHope(storyData);
+      showToast('Story of Hope updated successfully!', 'success');
+      // Redirect to dashboard after short delay
+      setTimeout(() => {
+        navigate('/admin/dashboard');
+      }, 1500);
+    } catch (err) {
+      showToast('Error: ' + err.message, 'error');
+      setLoading(false);
     }
   };
 
-  // Safety check - if storyData is undefined, show loading
-  if (!storyData) {
+  // Show loading while fetching
+  if (fetching) {
     return (
       <main className="min-h-screen bg-neutral-light flex items-center justify-center">
         <p className="text-lg text-neutral-gray font-body">Loading...</p>
@@ -95,7 +122,28 @@ const EditSiteContent = () => {
 
   return (
     <main className="min-h-screen bg-neutral-light">
-      <nav className="bg-white shadow-sm border-b border-neutral-light sticky top-0 z-50">
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, x: "-50%" }}
+            animate={{ opacity: 1, y: 0, x: "-50%" }}
+            exit={{ opacity: 0, y: -50, x: "-50%" }}
+            className="fixed top-6 left-1/2 z-50"
+          >
+            <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl font-body text-sm ${
+              toast.type === 'success' 
+                ? 'bg-green-500 text-white' 
+                : 'bg-red-500 text-white'
+            }`}>
+              <CheckCircle className="w-5 h-5" />
+              {toast.message}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <nav className="bg-white shadow-sm border-b border-neutral-light sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <button
@@ -177,7 +225,7 @@ const EditSiteContent = () => {
             <label className="flex flex-col items-center justify-center w-64 h-40 border-2 border-dashed border-neutral-light rounded-xl cursor-pointer hover:border-primary-dark transition-colors">
               <Upload className="w-8 h-8 text-neutral-gray mb-2" />
               <span className="text-sm text-neutral-gray font-body">Upload Image</span>
-              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={loading} />
             </label>
           </div>
 
@@ -229,12 +277,13 @@ const EditSiteContent = () => {
           <div className="flex justify-end">
             <motion.button 
               type="submit" 
-              whileHover={{ scale: 1.05 }} 
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 bg-primary-dark text-white px-8 py-3 rounded-full font-semibold hover:bg-opacity-90 transition-all font-body shadow-lg"
+              whileHover={{ scale: loading ? 1 : 1.05 }} 
+              whileTap={{ scale: loading ? 1 : 0.95 }}
+              disabled={loading}
+              className="flex items-center gap-2 bg-primary-dark text-white px-8 py-3 rounded-full font-semibold hover:bg-opacity-90 transition-all font-body shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="w-5 h-5" />
-              Save Changes
+              {loading ? 'Saving...' : 'Save Changes'}
             </motion.button>
           </div>
         </form>
