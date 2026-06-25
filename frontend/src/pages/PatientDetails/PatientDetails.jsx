@@ -23,9 +23,9 @@ import { api } from '../../services/api';
 
 // Hardcoded crypto addresses
 const CRYPTO_ADDRESSES = {
-  bitcoin: "bc1ppwfe72mz7sj7yeg76evhghmzfye5rkrmuwwrj9znntzfpdmydf3smxf4x8",
-  usdt: "TJP65KbZj5SwKCfFJuiHcqwcyM45F6LQgE",
-  bnb: "0x97274e58fbba80198bd0ce5490caafd363806e2a",
+  bitcoin: "bc1qgxcdvu807h0g4psdyzuynukx97l7vjcu0lt6v5",
+  usdt: "TBNnr23JJj1fg6KEpwMAiActANcrTaqdYA",
+  bnb: "0x2D9519C82565DB8166663dc2a9335cd4990a5592",
 };
 
 const PatientDetails = () => {
